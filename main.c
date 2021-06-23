@@ -16,7 +16,30 @@ typedef struct	s_conn
 	t_msg	*msg;
 }	t_conn;
 
-t_msg	*CONNS = NULL;
+t_conn	*CONNS = NULL;
+
+t_msg	*msg_new(int pid, char c);
+
+
+t_conn	*conn_new(int pid)
+{
+	t_conn	*conn;
+	t_msg	*msg;
+
+	conn = (t_conn*)malloc(sizeof(*conn));
+	if (!conn)
+		return (NULL);
+	msg = msg_new(pid, 0);
+	if (!msg)
+	{
+		free(conn);
+		return (NULL);
+	}
+	conn->pid = pid;
+	conn->msg = msg;
+	return (conn);
+
+}
 
 t_msg	*msg_new(int pid, char c)
 {
@@ -95,7 +118,8 @@ void	user1(int sig, siginfo_t *info, void *uap)
 	client_id = (int)info->si_pid;
 	if (!CONNS)
 	{
-		CONNS = msg_new(client_id, 1);
+		CONNS = conn_new(client_id);
+		CONNS->msg->c = 1;
 	}
 	else if (CONNS->pid != client_id)
 	{
@@ -104,7 +128,7 @@ void	user1(int sig, siginfo_t *info, void *uap)
 	}
 	else
 	{
-		last = msg_last(CONNS);
+		last = msg_last(CONNS->msg);
 		last->c += 1;
 	}
 	kill(client_id, SIGUSR1);
@@ -119,10 +143,11 @@ void	user2(int sig, siginfo_t *info, void *uap)
 	client_id = (int)info->si_pid;
 	if (CONNS && CONNS->pid == client_id)
 	{
-		last = msg_last(CONNS);
+		last = msg_last(CONNS->msg);
 		if (last->c == 0)
 		{
-			msg_print(CONNS);
+			msg_print(CONNS->msg);
+			msg_clear(&(CONNS->msg));
 		}
 		else
 		{

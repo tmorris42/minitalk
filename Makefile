@@ -1,3 +1,3 @@
 all:
 	gcc playground.c -o playground
-	gcc main.c -o server
+	gcc -fsanitize=address main.c -o server

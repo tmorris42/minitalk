@@ -123,24 +123,29 @@ void	user1(int sig, siginfo_t *info, void *uap)
 	{
 		CONNS = conn_new(client_id);
 		if (!CONNS)
+		{
 			printf("ERROR! connection could not be establish due to malloc failure");
+			return ;
+		}
 		else if (CONNS && CONNS->msg)
 		{
-			printf("I got a new signal 1 and created a new connection!\n");
-			CONNS->msg->c = 1;
+			printf("I got a new signal 1 and created a new connection!\nNow I'm going to sleep\n");
+//			sleep(10);
+			printf("Done sleeping!\n");
+			CONNS->msg->c = 0;
 		}
 	}
 	else if (CONNS->pid != client_id)
 	{
-		printf("ERROR! Wrong client ID (got:%d but expected:%d)\n", client_id, CONNS->pid);
-		return ;
+//		printf("ERROR! Wrong client ID (got:%d but expected:%d)\n", client_id, CONNS->pid);
+//		return ;
 	}
-	else
-	{
-		printf("I got a new signal 1!\n");
+//	else
+//	{
+//		printf("I got a new signal 1!\n");
 		last = msg_last(CONNS->msg);
 		last->c += 1;
-	}
+//	}
 	kill(client_id, SIGUSR1);
 }
 
@@ -151,7 +156,8 @@ void	user2(int sig, siginfo_t *info, void *uap)
 	t_msg	*last;
 
 	client_id = (int)info->si_pid;
-	if (CONNS && CONNS->pid == client_id)
+//	if (CONNS && CONNS->pid == client_id)
+	if (CONNS)
 	{
 		last = msg_last(CONNS->msg);
 		if (last->c == 0)
@@ -173,23 +179,56 @@ void	user2(int sig, siginfo_t *info, void *uap)
 	kill(client_id, SIGUSR2);
 }
 
+void	universal(int sig, siginfo_t *info, void *uap)
+{
+	static char c = 0;
+	int	client_id;
+
+	client_id = info->si_pid;
+	if (info->si_signo == SIGINT)
+	{
+	}
+	else if (info->si_signo == SIGUSR1)
+	{
+		c += 1;
+	}
+	else if (info->si_signo == SIGUSR2)
+	{
+		if (c)
+		{
+			write(1, &c, 1);
+		}
+		c = 0;
+	}
+	kill(client_id, SIGUSR1);
+}
+
 
 
 int	main(void)
 {
 	struct sigaction act1;
-	struct sigaction act2;
+//	struct sigaction act2;
 
 	int	pid;
-	int	looping;
+//	int	looping;
 
-	act1.sa_sigaction = &user1;
+	act1.sa_sigaction = &universal;
 	act1.sa_flags = SA_SIGINFO;
-	act2.sa_sigaction = &user2;
-	act2.sa_flags = SA_SIGINFO;
+	sigemptyset(&act1.sa_mask);
+//	sigaddset(&act1.sa_mask, SIGINT);
+	sigaddset(&act1.sa_mask, SIGUSR1);
+	sigaddset(&act1.sa_mask, SIGUSR2);
+
+//	act2.sa_sigaction = &user2;
+//	act2.sa_flags = SA_SIGINFO;
+//	sigemptyset(&act2.sa_mask);
+//	sigaddset(&act2.sa_mask, SIGINT);
+//	sigaddset(&act2.sa_mask, SIGUSR1);
+//	sigaddset(&act2.sa_mask, SIGUSR2);
 
 	
-	if (sigaction(SIGUSR1, &act1, NULL) < 0)
+/*	if (sigaction(SIGUSR1, &act1, NULL) < 0)
 	{
 		printf("ERROR ENCOUNTERED with act1!\n");
 		return (0);
@@ -199,7 +238,17 @@ int	main(void)
 		printf("ERROR ENCOUNTERED with act2!\n");
 		return (0);
 	}
-
+*/
+	if (sigaction(SIGUSR1, &act1, NULL) < 0)
+	{
+		printf("ERROR ENCOUNTERED with act1!\n");
+		return (0);
+	}
+	if (sigaction(SIGUSR2, &act1, NULL) < 0)
+	{
+		printf("ERROR ENCOUNTERED with act2!\n");
+		return (0);
+	}
 	pid = getpid();
 	printf("My PID is %d\n", pid);
 	while (1)

@@ -3,8 +3,24 @@
 #include <signal.h>
 #include <unistd.h>
 
+const int	DELAY = 20;
+int	g_confirmed = 0;
+
+void	hold_on(void)
+{
+	int	i;
+
+	i = 0;
+	while (!g_confirmed && i < 100)
+	{
+		usleep(DELAY);
+		++i;
+	}
+}
+
 void	get_receipt()
 {
+	++g_confirmed;
 }
 
 void	send_char(int pid, char c)
@@ -12,14 +28,26 @@ void	send_char(int pid, char c)
 	char	sent;
 
 	sent = 0;
+	g_confirmed = 0;
 	while (sent != c)
 	{
 		kill(pid, SIGUSR1);
-		pause();
+		usleep(DELAY);
+		if (g_confirmed > 0)
+		{
+			--g_confirmed;
+		}
 		++sent;
+		usleep(DELAY);
 	}
-	kill(pid, SIGUSR2);
-	pause();
+	g_confirmed = 0;
+	while (!g_confirmed)
+	{
+		kill(pid, SIGUSR2);
+		usleep(DELAY);
+		usleep(DELAY);
+	}
+	g_confirmed = 0;
 }
 
 void	send_msg(int pid, char *msg)
@@ -53,8 +81,8 @@ int	main(int argc, char **argv)
 
 	printf("My PID = %d\n", getpid());
 	send_msg(pid, msg);
-	kill(pid, SIGUSR2);
-	pause();
+//	kill(pid, SIGUSR2);
+//	pause();
 	printf("Quitting\n");
 	return (0);
 }

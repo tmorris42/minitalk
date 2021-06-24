@@ -23,3 +23,11 @@ $(NAME): $(SERVER_OBJS)
 
 $(CLIENT): $(CLIENT_OBJS)
 	$(GCC) $(CLIENT_SRCS) -o $(CLIENT)
+
+clean:
+	rm $(SERVER_OBJS) $(CLIENT_OBJS)
+
+fclean: clean
+	rm $(NAME) $(CLIENT)
+
+re: fclean all

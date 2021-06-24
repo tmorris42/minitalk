@@ -8,18 +8,20 @@ typedef struct	s_msg
 	int		pid;
 	char	c;
 	struct s_msg	*next;
-}	t_msg;
+}				t_msg;
 
 typedef struct	s_conn
 {
-	int		pid;
-	t_msg	*msg;
-}	t_conn;
-
-t_conn	*CONNS = NULL;
+	int				pid;
+	t_msg			*msg;
+	struct s_conn	*next;
+}				t_conn;
 
 t_msg	*msg_new(int pid, char c);
 
+t_conn	*CONNS = NULL; // perhaps use a static variable in handler function instead
+// then handle SIGINT to go free everything
+/* */
 
 t_conn	*conn_new(int pid)
 {
@@ -37,6 +39,7 @@ t_conn	*conn_new(int pid)
 	}
 	conn->pid = pid;
 	conn->msg = msg;
+	conn->next = NULL;
 	return (conn);
 
 }
@@ -119,15 +122,22 @@ void	user1(int sig, siginfo_t *info, void *uap)
 	if (!CONNS)
 	{
 		CONNS = conn_new(client_id);
-		CONNS->msg->c = 1;
+		if (!CONNS)
+			printf("ERROR! connection could not be establish due to malloc failure");
+		else if (CONNS && CONNS->msg)
+		{
+			printf("I got a new signal 1 and created a new connection!\n");
+			CONNS->msg->c = 1;
+		}
 	}
 	else if (CONNS->pid != client_id)
 	{
-		printf("ERROR! Wrong client ID\n");
+		printf("ERROR! Wrong client ID (got:%d but expected:%d)\n", client_id, CONNS->pid);
 		return ;
 	}
 	else
 	{
+		printf("I got a new signal 1!\n");
 		last = msg_last(CONNS->msg);
 		last->c += 1;
 	}
@@ -146,11 +156,13 @@ void	user2(int sig, siginfo_t *info, void *uap)
 		last = msg_last(CONNS->msg);
 		if (last->c == 0)
 		{
+			printf("Got signal 2 on empty char, printing message\n");
 			msg_print(CONNS->msg);
 			msg_clear(&(CONNS->msg));
 		}
 		else
 		{
+			printf("Got signal 2 on char, adding next char slot\n");
 			last->next = msg_new(client_id, 0);
 			if (!(last->next))
 				printf("ERROR, MALLOC FAILED TO CREATE NEW LINK\n"); //return error

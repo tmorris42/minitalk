@@ -1,5 +1,7 @@
 import os
+import random
 import signal
+import string
 import subprocess
 import threading
 import datetime
@@ -23,6 +25,7 @@ def start_client(msg="test"):
     #print(output)
 
 def test_one_server_one_client(msg="test"):
+    start = datetime.datetime.now().timestamp()
     to_print = f'Testing "{msg}"\n'
     server_id_event = threading.Event()
 
@@ -41,13 +44,15 @@ def test_one_server_one_client(msg="test"):
 
     os.kill(SERVER_ID, signal.SIGINT)
     server.join()
+    elapsed = datetime.datetime.now().timestamp() - start
     with open(TEMP_LOG, "r") as temp_log:
         contents = temp_log.read()
         if (contents != msg):
             to_print += f"ERROR!\nReceived: {contents}\nExpected: {msg}\n"
         else:
             to_print += "OK!"
-        to_print += f'\n\n'
+        to_print += f"\nRuntime: {elapsed} [{len(msg)/elapsed} c/s]"
+        to_print += '\n\n'
         with open(LOGFILE, "a") as logfile:
             print(to_print);
             logfile.write(to_print)
@@ -62,6 +67,10 @@ if __name__ == "__main__":
         os.remove(TEMP_LOG)
 
     signal.signal(signal.SIGUSR1, signal.SIG_IGN)
+   
+    letters = string.ascii_letters + string.digits + string.punctuation
+    test_string = ''.join(random.choice(letters) for i in range(100))
     
     test_one_server_one_client("hello\n")
+    test_one_server_one_client(test_string)
     test_one_server_one_client()

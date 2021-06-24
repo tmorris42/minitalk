@@ -3,7 +3,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-const int	DELAY = 20;
+const int	DELAY = 40;
 int	g_confirmed = 0;
 
 void	hold_on(void)

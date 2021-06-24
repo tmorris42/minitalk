@@ -2,12 +2,15 @@ import os
 import signal
 import subprocess
 import threading
+import datetime
 
 SERVER_ID = None
+LOGFILE = datetime.datetime.now().strftime("./logs/%Y-%m-%d-%H-%M-%S.log")
+TEMP_LOG = "./logs/temp.log"
 
 def start_server(server_id_event):
     global SERVER_ID
-    with open("logfile2", "a") as logfile:
+    with open(TEMP_LOG, "a") as logfile:
         global SERVER_ID
         proc = subprocess.Popen("./server", stdout=logfile, stderr=None, text=True,
                 bufsize=1, close_fds=True)
@@ -15,11 +18,12 @@ def start_server(server_id_event):
         server_id_event.set()
         proc.wait()
 
-def start_client():
-    output = subprocess.run(["./client", f"{SERVER_ID}", "test"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    print(output)
+def start_client(msg="test"):
+    output = subprocess.run(["./client", str(SERVER_ID), str(msg)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    #print(output)
 
-if __name__ == "__main__":
+def test_one_server_one_client(msg="test"):
+    to_print = f'Testing "{msg}"\n'
     server_id_event = threading.Event()
 
     server = threading.Thread(target=start_server, args=(server_id_event,))
@@ -30,10 +34,34 @@ if __name__ == "__main__":
     if SERVER_ID:
         print(SERVER_ID)
 
-        client = threading.Thread(target=start_client)
+        client = threading.Thread(target=start_client, args=(msg,))
         client.start()
 
         client.join()
 
     os.kill(SERVER_ID, signal.SIGINT)
     server.join()
+    with open(TEMP_LOG, "r") as temp_log:
+        contents = temp_log.read()
+        if (contents != msg):
+            to_print += f"ERROR!\nReceived: {contents}\nExpected: {msg}\n"
+        else:
+            to_print += "OK!"
+        to_print += f'\n\n'
+        with open(LOGFILE, "a") as logfile:
+            print(to_print);
+            logfile.write(to_print)
+    if os.path.exists(TEMP_LOG):
+        os.remove(TEMP_LOG)
+
+
+if __name__ == "__main__":
+    if not os.path.isdir("./logs"):
+        os.mkdir("logs")
+    if os.path.exists(TEMP_LOG):
+        os.remove(TEMP_LOG)
+
+    signal.signal(signal.SIGUSR1, signal.SIG_IGN)
+    
+    test_one_server_one_client("hello\n")
+    test_one_server_one_client()

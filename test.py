@@ -68,9 +68,13 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGUSR1, signal.SIG_IGN)
    
+    test_one_server_one_client("hello\n")
+    test_one_server_one_client()
+    test_one_server_one_client("\n")
+
     letters = string.ascii_letters + string.digits + string.punctuation
     test_string = ''.join(random.choice(letters) for i in range(100))
-    
-    test_one_server_one_client("hello\n")
     test_one_server_one_client(test_string)
-    test_one_server_one_client()
+    
+    test_string = ''.join(random.choice(letters) for i in range(500))
+#    test_one_server_one_client(test_string)

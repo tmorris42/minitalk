@@ -3,51 +3,31 @@
 #include <signal.h>
 #include <unistd.h>
 
-const int	DELAY = 40;
+const int	DELAY = 1000;
 int	g_confirmed = 0;
-
-void	hold_on(void)
-{
-	int	i;
-
-	i = 0;
-	while (!g_confirmed && i < 100)
-	{
-		usleep(DELAY);
-		++i;
-	}
-}
 
 void	get_receipt()
 {
-	++g_confirmed;
 }
 
 void	send_char(int pid, char c)
 {
 	char	sent;
+	int	i;
 
 	sent = 0;
-	g_confirmed = 0;
-	while (sent != c)
+	i = 1;
+	while (i < 256)
 	{
-		kill(pid, SIGUSR1);
+		if ((c & (0x1 * i)) > 0)
+			kill(pid, SIGUSR1);
+		else
+			kill(pid, SIGUSR2);
 		usleep(DELAY);
-		if (g_confirmed > 0)
-		{
-			--g_confirmed;
-		}
 		++sent;
+		i *= 2;
 		usleep(DELAY);
 	}
-	g_confirmed = 0;
-	while (!g_confirmed)
-	{
-		kill(pid, SIGUSR2);
-		usleep(DELAY);
-		usleep(DELAY);
-	}
-	g_confirmed = 0;
 }
 
 void	send_msg(int pid, char *msg)
@@ -60,12 +40,19 @@ void	send_msg(int pid, char *msg)
 		send_char(pid, msg[i]);
 		++i;
 	}
+	i = 0;
+	while (i < 8)
+	{
+		kill(pid, SIGUSR2);
+		usleep(DELAY);
+		usleep(DELAY);
+		++i;
+	}
 }
 
 int	main(int argc, char **argv)
 {
 	int	pid;
-	char	sent;
 	char	*msg;
 
 	signal(SIGUSR1, get_receipt);

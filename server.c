@@ -182,7 +182,9 @@ void	user2(int sig, siginfo_t *info, void *uap)
 void	universal(int sig, siginfo_t *info, void *uap)
 {
 	static char c = 0;
+	static char mask = 0;
 	int	client_id;
+	int	i;
 
 	client_id = info->si_pid;
 	if (info->si_signo == SIGINT)
@@ -190,16 +192,38 @@ void	universal(int sig, siginfo_t *info, void *uap)
 	}
 	else if (info->si_signo == SIGUSR1)
 	{
-		c += 1;
+//		write(1, "1", 1);
+		i = 1;
+		while (i < 256 && ((mask & i) > 0))
+		{
+			i *= 2;
+		}
+		c = (c | (0x1 * i));
+		mask = (mask | (0x1 * i));
 	}
 	else if (info->si_signo == SIGUSR2)
 	{
-		if (c)
+//		write(1, "0", 1);
+		i = 1;
+		while (i < 256 && ((mask & i) > 0))
 		{
-			write(1, &c, 1);
+			i *= 2;
 		}
-		c = 0;
+		c = (c | (0x0 * i));
+		mask = (mask | (0x1 * i));
 	}
+	if (mask == -1)
+	{
+		if (c)
+			write(1, &c, 1);
+//		printf("c=%c (%d), mask=%d\n", c, c, mask);
+//			write(1, " ", 1);
+			c = 0;
+			mask = 0;
+	}
+//	else
+//		printf("c=%c (%d), mask=%d\n", c, c, mask);
+
 	kill(client_id, SIGUSR1);
 }
 

@@ -12,14 +12,11 @@ void	universal(int sig, siginfo_t *info, void *uap)
 		return ;
 	if (sig == SIGUSR1)
 	{
-		c = (c | (0x1 * i));
+		c = (c | i);
 		i *= 2;
 	}
 	else if (sig == SIGUSR2)
-	{
-		c = (c | (0x0 * i));
 		i *= 2;
-	}
 	if (i > 255)
 	{
 		if (c)

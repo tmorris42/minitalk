@@ -23,19 +23,16 @@ static int	ft_atoi(char *msg)
 
 void	send_char(int pid, char c)
 {
-	char	sent;
 	int		i;
 
-	sent = 0;
 	i = 1;
 	while (i < 256)
 	{
-		if ((c & (0x1 * i)) > 0)
+		if ((c & i) > 0)
 			kill(pid, SIGUSR1);
 		else
 			kill(pid, SIGUSR2);
 		usleep(DELAY);
-		++sent;
 		i *= 2;
 		usleep(DELAY);
 	}

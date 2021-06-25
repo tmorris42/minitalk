@@ -7,8 +7,7 @@ SERVER_OBJS = ${SERVER_SRCS:.c=.o}
 CLIENT_OBJS = ${CLIENT_SRCS:.c=.o}
 
 GCC = gcc
-#FLAGS = -Wall -Wextra -Werror
-FLAGS = -Wall -Wextra
+FLAGS = -Wall -Wextra -Werror
 
 all: $(NAME) $(CLIENT)
 
@@ -22,7 +21,7 @@ $(NAME): $(SERVER_OBJS)
 	$(GCC) $(FLAGS) $(SERVER_OBJS) -o $(NAME)
 
 $(CLIENT): $(CLIENT_OBJS)
-	$(GCC) $(CLIENT_SRCS) -o $(CLIENT)
+	$(GCC) $(FLAGS) $(CLIENT_SRCS) -o $(CLIENT)
 
 clean:
 	rm $(SERVER_OBJS) $(CLIENT_OBJS)

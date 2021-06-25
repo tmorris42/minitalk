@@ -2,6 +2,7 @@ NAME = server
 CLIENT = client
 SERVER_SRCS = server.c
 CLIENT_SRCS = client.c
+HEADERS = minitalk.h
 
 SERVER_OBJS = ${SERVER_SRCS:.c=.o}
 CLIENT_OBJS = ${CLIENT_SRCS:.c=.o}
@@ -11,10 +12,10 @@ FLAGS = -Wall -Wextra -Werror
 
 all: $(NAME) $(CLIENT)
 
-$(SERVER_OBJS): %.o : %.c
+$(SERVER_OBJS): %.o : %.c $(HEADERS)
 	$(GCC) -c $(FLAGS) $(SERVER_SRCS)
 
-$(CLIENT_OBJS): %.o : %.c
+$(CLIENT_OBJS): %.o : %.c $(HEADERS)
 	$(GCC) -c $(FLAGS) $(CLIENT_SRCS)
 
 $(NAME): $(SERVER_OBJS)

@@ -1,12 +1,25 @@
-/* 
-#include <stdio.h> //
-#include <stdlib.h> //
- */
-#include <signal.h>
-#include <unistd.h>
+#include "minitalk.h"
 
-#define DELAY 50
-int	g_confirmed = 0;
+static int	ft_atoi(char *msg)
+{
+	unsigned int	nbr;
+	int				i;
+
+	nbr = 0;
+	i = 0;
+	while (msg && msg[i])
+	{
+		if (msg[i] < '0' || msg[i] > '9')
+			return (-1);
+		nbr = nbr * 10;
+		nbr += (msg[i] - '0');
+		++i;
+	}
+	i = (int)nbr;
+	if ((unsigned int)i != nbr)
+		return (-1);
+	return (i);
+}
 
 void	send_char(int pid, char c)
 {
@@ -57,13 +70,13 @@ int	main(int argc, char **argv)
 	signal(SIGUSR2, SIG_IGN);
 	if (argc == 3)
 	{
-		pid = atoi(argv[1]);
+		pid = ft_atoi(argv[1]);
 		if (pid < 1)
-			return (0);
+			return (1);
 		msg = argv[2];
 	}
 	else
-		return (0);
+		return (1);
 	send_msg(pid, msg);
 	return (0);
 }

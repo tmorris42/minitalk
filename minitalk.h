@@ -1,4 +1,5 @@
 #ifndef MINITALK_H
+# define MINITALK_H
 # include <unistd.h>
 # include <signal.h>
 
@@ -6,14 +7,14 @@
 #  define DELAY 1000
 # endif
 
-typedef struct	s_msg
+typedef struct s_msg
 {
-	int		pid;
-	char	c;
+	int				pid;
+	char			c;
 	struct s_msg	*next;
 }				t_msg;
 
-typedef struct	s_conn
+typedef struct s_conn
 {
 	int				pid;
 	t_msg			*msg;

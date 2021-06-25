@@ -8,6 +8,8 @@ void	universal(int sig, siginfo_t *info, void *uap)
 	static char	c = 0;
 	static int	i = 1;
 
+	if (!uap)
+		return ;
 	if (sig == SIGUSR1)
 	{
 		c = (c | (0x1 * i));

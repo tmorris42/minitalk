@@ -1,19 +1,17 @@
+/* 
 #include <stdio.h> //
 #include <stdlib.h> //
+ */
 #include <signal.h>
 #include <unistd.h>
 
-const int	DELAY = 1000;
+#define DELAY 50
 int	g_confirmed = 0;
-
-void	get_receipt()
-{
-}
 
 void	send_char(int pid, char c)
 {
 	char	sent;
-	int	i;
+	int		i;
 
 	sent = 0;
 	i = 1;
@@ -52,24 +50,20 @@ void	send_msg(int pid, char *msg)
 
 int	main(int argc, char **argv)
 {
-	int	pid;
+	int		pid;
 	char	*msg;
 
-	signal(SIGUSR1, get_receipt);
-	signal(SIGUSR2, get_receipt);
-
+	signal(SIGUSR1, SIG_IGN);
+	signal(SIGUSR2, SIG_IGN);
 	if (argc == 3)
 	{
 		pid = atoi(argv[1]);
+		if (pid < 1)
+			return (0);
 		msg = argv[2];
 	}
 	else
 		return (0);
-
-	printf("My PID = %d\n", getpid());
 	send_msg(pid, msg);
-//	kill(pid, SIGUSR2);
-//	pause();
-	printf("Quitting\n");
 	return (0);
 }

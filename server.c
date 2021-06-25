@@ -1,7 +1,20 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <signal.h>
-#include <stdlib.h>
+#include "minitalk.h"
+
+static void	ft_putnbr(int n)
+{
+	char	c;
+
+	if (n < 0)
+		return ;
+	if (n < 10)
+	{
+		c = n + '0';
+		write(1, &c, 1);
+		return ;
+	}
+	ft_putnbr(n / 10);
+	ft_putnbr(n % 10);
+}
 
 void	universal(int sig, siginfo_t *info, void *uap)
 {
@@ -34,19 +47,15 @@ int	main(void)
 	sigaddset(&act1.sa_mask, SIGUSR1);
 	sigaddset(&act1.sa_mask, SIGUSR2);
 	if (sigaction(SIGUSR1, &act1, NULL) < 0)
-	{
-		printf("ERROR ENCOUNTERED with act1!\n");
-		return (0);
-	}
+		return (1);
 	if (sigaction(SIGUSR2, &act1, NULL) < 0)
-	{
-		printf("ERROR ENCOUNTERED with act2!\n");
-		return (0);
-	}
+		return (1);
 	pid = getpid();
-	printf("My PID is %d\n", pid);
+	if (pid < 1)
+		return (-1);
+	ft_putnbr(pid);
+	write(1, "\n", 1);
 	while (1)
 		pause();
-	printf("I'm after my pause...\n");
 	return (0);
 }

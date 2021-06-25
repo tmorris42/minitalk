@@ -47,6 +47,7 @@ def test_one_server_one_client(msg="test"):
     elapsed = datetime.datetime.now().timestamp() - start
     with open(TEMP_LOG, "r") as temp_log:
         contents = temp_log.read()
+        msg = str(SERVER_ID) + "\n" + msg
         if (contents != msg):
             to_print += f"ERROR!\nReceived: {contents}\nExpected: {msg}\n"
         else:

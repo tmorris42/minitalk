@@ -15,6 +15,10 @@ RED = "\033[0;31m"
 WHITE = "\033[0;37m"
 RESET = "\033[0;0m"
 
+def log(msg):
+    with open(LOGFILE, "a") as logfile:
+        logfile.write(msg)
+
 def start_server(server_id_event):
     global SERVER_ID
     with open(TEMP_LOG, "a") as logfile:
@@ -73,41 +77,70 @@ def test_one_server_one_client(msg="test"):
     print(medium, end="")
     return ret
 
-def test_one_server_two_clients(msg="test"):
-    start = datetime.datetime.now().timestamp()
+def server_init():
+    global SERVER_ID
+    SERVER_ID = 0
     server_id_event = threading.Event()
     server = threading.Thread(target=start_server, args=(server_id_event,))
     server.start()
     server_id_event.wait()
+    return server
 
-    if SERVER_ID:
-        expected = str(SERVER_ID) + "\n"
-        client = threading.Thread(target=start_client, args=(msg + "(#1)",))
-        client.start()
-        client.join()
-        expected += msg + "(#1)"
-        
-        client = threading.Thread(target=start_client, args=(msg + "(#2)",))
-        client.start()
-        client.join()
-        expected += msg + "(#2)"
 
+def server_close(server):
     os.kill(SERVER_ID, signal.SIGINT)
     server.join()
+
+def test_one_server_two_clients(msg="test"):
+    # Get start time to calculate elapsed time
+    start = datetime.datetime.now().timestamp()
+
+    # Start the server
+    server = server_init()
+    if not SERVER_ID:
+        server_close(server)
+        log("Unknown problem starting server\nAborting...\n")
+        return -1
+        
+    # Run the client(s) to test
+    expected = str(SERVER_ID) + "\n"
+    client = threading.Thread(target=start_client, args=(msg + "(#1)",))
+    client.start()
+    client.join()
+    expected += msg + "(#1)"
+        
+    client = threading.Thread(target=start_client, args=(msg + "(#2)",))
+    client.start()
+    client.join()
+    expected += msg + "(#2)"
+
+    # Kill the server
+    server_close(server)
+
+    # Calculate the elapsed time
     elapsed = datetime.datetime.now().timestamp() - start
+
+    # Read the temporary server log, then delete
     with open(TEMP_LOG, "r") as temp_log:
         contents = temp_log.read()
-     #   expected = str(SERVER_ID) + "\n" + msg
-        if (contents != expected):
-            ret = -1
-        else:
-            ret = 0
+    if os.path.exists(TEMP_LOG):
+        os.remove(TEMP_LOG)
+
+    # Check for success
+    if (contents != expected):
+        ret = -1
+    else:
+        ret = 0
+
+    # Generate reports
     normal, medium, verbose = generate_report(msg, expected, contents, elapsed)
+
+    # Print and log reports
     print(medium, end="")
     with open(LOGFILE, "a") as logfile:
         logfile.write(verbose)
-    if os.path.exists(TEMP_LOG):
-        os.remove(TEMP_LOG)
+
+    # Return Success or Failure
     return ret
 
 if __name__ == "__main__":

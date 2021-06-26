@@ -28,24 +28,24 @@ def start_server(server_id_event):
 def start_client(msg="test"):
     output = subprocess.run(["./client", str(SERVER_ID), str(msg)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-def generate_report(test_name, expected, results):
-    normal = f"Test: {repr(test_name)}\n"
-    verbose = normal
+def generate_report(test_name, expected, results, elapsed):
+    normal = ""
+    verbose = ""
 
     if (results == expected):
-        verbose += f"{GREEN}OK!{RESET}\n"
-        normal += f"{GREEN}OK!{RESET}\n"
+        verbose += f"{GREEN}OK!{RESET}\t"
+        normal += f"{GREEN}OK!{RESET}\t"
     else:
-        verbose += f"KO!\n"
-        normal += f"{RED}ERROR!{RESET}\n"
-    verbose += f"Received: {repr(contents)}\nExpected: {repr(expected)}\n"
-    verbose += f"{WHITE}Runtime: {elapsed} [{len(msg)/elapsed} c/s]{RESET}\n\n"
+        verbose += f"KO!\t"
+        normal += f"{RED}KO!{RESET}\t"
+    normal += f"Test: {repr(test_name)}\n"
+    verbose += f"Test: {repr(test_name)}\n"
+    verbose += f"Received: {repr(results)}\nExpected: {repr(expected)}\n"
+    verbose += f"{WHITE}Runtime: {elapsed} [{len(results)/elapsed} c/s]{RESET}\n\n"
     return (normal, verbose)
 
 def test_one_server_one_client(msg="test"):
     start = datetime.datetime.now().timestamp()
-    to_print = f'Testing one client with "{repr(msg)}"\n'
-    print(f'Testing one client...\t')
     server_id_event = threading.Event()
 
     server = threading.Thread(target=start_server, args=(server_id_event,))
@@ -55,36 +55,29 @@ def test_one_server_one_client(msg="test"):
     if SERVER_ID:
         client = threading.Thread(target=start_client, args=(msg,))
         client.start()
-
         client.join()
-
     os.kill(SERVER_ID, signal.SIGINT)
     server.join()
+
     elapsed = datetime.datetime.now().timestamp() - start
+    contents = ""
     with open(TEMP_LOG, "r") as temp_log:
         contents = temp_log.read()
         expected = str(SERVER_ID) + "\n" + msg
         if (contents != expected):
-            to_print += f"ERROR!\nReceived: {repr(contents)}\nExpected: {repr(expected)}\n"
-            print(f"{RED}ERROR!{RESET}\n")
             ret = -1
         else:
-            to_print += f"{GREEN}OK!{RESET}\n"
-            print(f"{GREEN}OK!{RESET}\n")
             ret = 0
-        to_print += f"Received: {repr(contents)}\nExpected: {repr(expected)}\n"
-        to_print += f"\n{WHITE}Runtime: {elapsed} [{len(msg)/elapsed} c/s]{RESET}"
-        to_print += '\n\n'
-        with open(LOGFILE, "a") as logfile:
-            logfile.write(to_print)
     if os.path.exists(TEMP_LOG):
         os.remove(TEMP_LOG)
+    normal, verbose = generate_report(msg, expected, contents, elapsed)
+    with open(LOGFILE, "a") as logfile:
+        logfile.write(verbose)
+    print(normal, end="")
     return ret
 
 def test_one_server_two_clients(msg="test"):
     start = datetime.datetime.now().timestamp()
-    to_print = f'Testing two clients with "{msg}"\n'
-    print(f'Testing two clients...\t')
     server_id_event = threading.Event()
 
     server = threading.Thread(target=start_server, args=(server_id_event,))
@@ -109,20 +102,15 @@ def test_one_server_two_clients(msg="test"):
     elapsed = datetime.datetime.now().timestamp() - start
     with open(TEMP_LOG, "r") as temp_log:
         contents = temp_log.read()
-        msg = str(SERVER_ID) + "\n" + msg
+     #   expected = str(SERVER_ID) + "\n" + msg
         if (contents != expected):
-            to_print += f"ERROR!\nReceived: {contents}\nExpected: {expected}\n"
-            print(f"{RED}ERROR!{RESET}\n")
             ret = -1
         else:
-            to_print += "OK!\n"
-            print(f"{GREEN}OK!{RESET}\n")
             ret = 0
-        to_print += f"Received: {contents}\nExpected: {expected}\n"
-        to_print += f"\nRuntime: {elapsed} [{len(msg)/elapsed} c/s]"
-        to_print += '\n\n'
-        with open(LOGFILE, "a") as logfile:
-            logfile.write(to_print)
+    normal, verbose = generate_report(msg, expected, contents, elapsed)
+    print(normal)
+    with open(LOGFILE, "a") as logfile:
+        logfile.write(verbose)
     if os.path.exists(TEMP_LOG):
         os.remove(TEMP_LOG)
     return ret

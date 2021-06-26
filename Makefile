@@ -33,6 +33,6 @@ fclean: clean
 re: fclean all
 
 test: $(NAME) $(CLIENT) test.py
-	python3.7 test.py
+	@python3.7 test.py
 
 .PHONY: all clean fclean re test

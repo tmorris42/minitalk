@@ -10,6 +10,11 @@ SERVER_ID = None
 LOGFILE = datetime.datetime.now().strftime("./logs/%Y-%m-%d-%H-%M-%S.log")
 TEMP_LOG = "./logs/temp.log"
 
+GREEN = "\033[0;32m"
+RED = "\033[0;31m"
+WHITE = "\033[0;37m"
+RESET = "\033[0;0m"
+
 def start_server(server_id_event):
     global SERVER_ID
     with open(TEMP_LOG, "a") as logfile:
@@ -23,15 +28,28 @@ def start_server(server_id_event):
 def start_client(msg="test"):
     output = subprocess.run(["./client", str(SERVER_ID), str(msg)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
+def generate_report(test_name, expected, results):
+    normal = f"Test: {repr(test_name)}\n"
+    verbose = normal
+
+    if (results == expected):
+        verbose += f"{GREEN}OK!{RESET}\n"
+        normal += f"{GREEN}OK!{RESET}\n"
+    else:
+        verbose += f"KO!\n"
+        normal += f"{RED}ERROR!{RESET}\n"
+    verbose += f"Received: {repr(contents)}\nExpected: {repr(expected)}\n"
+    verbose += f"{WHITE}Runtime: {elapsed} [{len(msg)/elapsed} c/s]{RESET}\n\n"
+    return (normal, verbose)
+
 def test_one_server_one_client(msg="test"):
     start = datetime.datetime.now().timestamp()
-    to_print = f'Testing one client with "{msg}"\n'
+    to_print = f'Testing one client with "{repr(msg)}"\n'
     print(f'Testing one client...\t')
     server_id_event = threading.Event()
 
     server = threading.Thread(target=start_server, args=(server_id_event,))
     server.start()
-
     server_id_event.wait()
 
     if SERVER_ID:
@@ -45,17 +63,17 @@ def test_one_server_one_client(msg="test"):
     elapsed = datetime.datetime.now().timestamp() - start
     with open(TEMP_LOG, "r") as temp_log:
         contents = temp_log.read()
-        msg = str(SERVER_ID) + "\n" + msg
-        if (contents != msg):
-            to_print += f"ERROR!\nReceived: {contents}\nExpected: {msg}\n"
-            print("ERROR!\n")
+        expected = str(SERVER_ID) + "\n" + msg
+        if (contents != expected):
+            to_print += f"ERROR!\nReceived: {repr(contents)}\nExpected: {repr(expected)}\n"
+            print(f"{RED}ERROR!{RESET}\n")
             ret = -1
         else:
-            to_print += "OK!\n"
-            print("OK!\n")
+            to_print += f"{GREEN}OK!{RESET}\n"
+            print(f"{GREEN}OK!{RESET}\n")
             ret = 0
-        to_print += f"Received: {contents}\nExpected: {msg}\n"
-        to_print += f"\nRuntime: {elapsed} [{len(msg)/elapsed} c/s]"
+        to_print += f"Received: {repr(contents)}\nExpected: {repr(expected)}\n"
+        to_print += f"\n{WHITE}Runtime: {elapsed} [{len(msg)/elapsed} c/s]{RESET}"
         to_print += '\n\n'
         with open(LOGFILE, "a") as logfile:
             logfile.write(to_print)
@@ -94,11 +112,11 @@ def test_one_server_two_clients(msg="test"):
         msg = str(SERVER_ID) + "\n" + msg
         if (contents != expected):
             to_print += f"ERROR!\nReceived: {contents}\nExpected: {expected}\n"
-            print("ERROR!\n")
+            print(f"{RED}ERROR!{RESET}\n")
             ret = -1
         else:
             to_print += "OK!\n"
-            print("OK!\n")
+            print(f"{GREEN}OK!{RESET}\n")
             ret = 0
         to_print += f"Received: {contents}\nExpected: {expected}\n"
         to_print += f"\nRuntime: {elapsed} [{len(msg)/elapsed} c/s]"
@@ -117,19 +135,25 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGUSR1, signal.SIG_IGN)
    
-    total = 6
+    total = 0
     err = 0
 
+    total += 1
     err += test_one_server_one_client("hello\n")
+    total += 1
     err += test_one_server_one_client()
+    total += 1
     err += test_one_server_one_client("\n")
+    total += 1
     err += test_one_server_two_clients("hello ")
 
     letters = string.ascii_letters + string.digits + string.punctuation
-    test_string = ''.join(random.choice(letters) for i in range(100))
-    err += test_one_server_one_client(test_string)
+ #   test_string = ''.join(random.choice(letters) for i in range(100))
+  #  total += 1
+   # err += test_one_server_one_client(test_string)
     
-    test_string = ''.join(random.choice(letters) for i in range(500))
-    err += test_one_server_one_client(test_string)
+  #  test_string = ''.join(random.choice(letters) for i in range(500))
+  #  total += 1
+  #  err += test_one_server_one_client(test_string)
 
     print(f"Passed {total + err}/{total}\n")

@@ -30,6 +30,7 @@ def start_client(msg="test"):
 
 def generate_report(test_name, expected, results, elapsed):
     normal = ""
+    medium = ""
     verbose = ""
 
     if (results == expected):
@@ -41,8 +42,10 @@ def generate_report(test_name, expected, results, elapsed):
     normal += f"Test: {repr(test_name)}\n"
     verbose += f"Test: {repr(test_name)}\n"
     verbose += f"Received: {repr(results)}\nExpected: {repr(expected)}\n"
+    medium = normal
+    medium += f"{WHITE}Runtime: {elapsed} [{len(results)/elapsed} c/s]{RESET}\n\n"
     verbose += f"{WHITE}Runtime: {elapsed} [{len(results)/elapsed} c/s]{RESET}\n\n"
-    return (normal, verbose)
+    return (normal, medium, verbose)
 
 def test_one_server_one_client(msg="test"):
     start = datetime.datetime.now().timestamp()
@@ -70,10 +73,10 @@ def test_one_server_one_client(msg="test"):
             ret = 0
     if os.path.exists(TEMP_LOG):
         os.remove(TEMP_LOG)
-    normal, verbose = generate_report(msg, expected, contents, elapsed)
+    normal, medium, verbose = generate_report(msg, expected, contents, elapsed)
     with open(LOGFILE, "a") as logfile:
         logfile.write(verbose)
-    print(normal, end="")
+    print(medium, end="")
     return ret
 
 def test_one_server_two_clients(msg="test"):
@@ -107,8 +110,8 @@ def test_one_server_two_clients(msg="test"):
             ret = -1
         else:
             ret = 0
-    normal, verbose = generate_report(msg, expected, contents, elapsed)
-    print(normal)
+    normal, medium, verbose = generate_report(msg, expected, contents, elapsed)
+    print(medium, end="")
     with open(LOGFILE, "a") as logfile:
         logfile.write(verbose)
     if os.path.exists(TEMP_LOG):

@@ -29,28 +29,22 @@ def start_client(msg="test"):
     output = subprocess.run(["./client", str(SERVER_ID), str(msg)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
 def generate_report(test_name, expected, results, elapsed):
-    normal = ""
-    medium = ""
-    verbose = ""
-
+    test_string = f"Test: {repr(test_name)}"
     if (results == expected):
-        verbose += f"{GREEN}OK!{RESET}\t"
-        normal += f"{GREEN}OK!{RESET}\t"
+        status = f"{GREEN}OK!{RESET}"
     else:
-        verbose += f"KO!\t"
-        normal += f"{RED}KO!{RESET}\t"
-    normal += f"Test: {repr(test_name)}\n"
-    verbose += f"Test: {repr(test_name)}\n"
-    verbose += f"Received: {repr(results)}\nExpected: {repr(expected)}\n"
-    medium = normal
-    medium += f"{WHITE}Runtime: {elapsed} [{len(results)/elapsed} c/s]{RESET}\n\n"
-    verbose += f"{WHITE}Runtime: {elapsed} [{len(results)/elapsed} c/s]{RESET}\n\n"
+        status= f"{RED}KO!{RESET}"
+    diff = f"Received: {repr(results)}\nExpected: {repr(expected)}\n"
+    runtime = f"{WHITE}Runtime: {elapsed} [{len(results)/elapsed} c/s]{RESET}\n\n"
+
+    normal = f"{status}\t{test_string}\n"
+    medium = normal + runtime
+    verbose = normal + diff + runtime
     return (normal, medium, verbose)
 
 def test_one_server_one_client(msg="test"):
     start = datetime.datetime.now().timestamp()
     server_id_event = threading.Event()
-
     server = threading.Thread(target=start_server, args=(server_id_event,))
     server.start()
     server_id_event.wait()
@@ -67,10 +61,10 @@ def test_one_server_one_client(msg="test"):
     with open(TEMP_LOG, "r") as temp_log:
         contents = temp_log.read()
         expected = str(SERVER_ID) + "\n" + msg
-        if (contents != expected):
-            ret = -1
-        else:
-            ret = 0
+    if (contents != expected):
+        ret = -1
+    else:
+        ret = 0
     if os.path.exists(TEMP_LOG):
         os.remove(TEMP_LOG)
     normal, medium, verbose = generate_report(msg, expected, contents, elapsed)
@@ -82,10 +76,8 @@ def test_one_server_one_client(msg="test"):
 def test_one_server_two_clients(msg="test"):
     start = datetime.datetime.now().timestamp()
     server_id_event = threading.Event()
-
     server = threading.Thread(target=start_server, args=(server_id_event,))
     server.start()
-
     server_id_event.wait()
 
     if SERVER_ID:

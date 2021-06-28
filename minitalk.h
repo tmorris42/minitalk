@@ -5,7 +5,7 @@
 # include <signal.h>
 
 # ifndef DELAY
-#  define DELAY 30
+#  define DELAY 185
 # endif
 
 typedef struct s_msg

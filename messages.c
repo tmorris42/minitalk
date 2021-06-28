@@ -41,6 +41,19 @@ t_msg	*msg_add_back(t_msg **list, t_msg *new)
 	return (new);
 }
 
+t_msg	*msg_new_add_back(t_msg **list, int pid, char c)
+{
+	t_msg	*new;
+
+	if (!list)
+		return (NULL);
+	new = msg_new(pid, c);
+	if (!new)
+		return (NULL);
+	msg_add_back(list, new);
+	return (new);
+}
+
 t_msg	*msg_clear(t_msg **list)
 {
 	t_msg	*curr;
@@ -58,14 +71,3 @@ t_msg	*msg_clear(t_msg **list)
 	(*list) = NULL;
 	return (NULL);
 }
-
-void	msg_print(t_msg *msg)
-{
-	while (msg && msg->c)
-	{
-		write(1, &msg->c, 1);
-		msg = msg->next;
-	}
-	write(1, "\n", 1);
-}
-

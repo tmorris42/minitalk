@@ -63,7 +63,10 @@ def test_one_server_one_client(msg="test"):
     elapsed = datetime.datetime.now().timestamp() - start
     contents = ""
     with open(TEMP_LOG, "r") as temp_log:
-        contents = temp_log.read()
+        try:
+            contents = temp_log.read()
+        except UnicodeDecodeError:
+            contents = "UNICODE ERROR!"
         expected = str(SERVER_ID) + "\n" + msg
     if (contents != expected):
         ret = -1

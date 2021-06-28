@@ -60,7 +60,6 @@ int	main(void)
 	sigemptyset(&act1.sa_mask);
 	sigaddset(&act1.sa_mask, SIGUSR1);
 	sigaddset(&act1.sa_mask, SIGUSR2);
-	sigaddset(&act1.sa_mask, SIGINT);
 	if (sigaction(SIGUSR1, &act1, NULL) < 0)
 		return (1);
 	if (sigaction(SIGUSR2, &act1, NULL) < 0)

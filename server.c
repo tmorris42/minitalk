@@ -22,7 +22,7 @@ void	quit_safely(t_msg **msg_addr)
 	exit(0);
 }
 
-void	universal(int sig, siginfo_t *info, void *uap)
+void	handler(int sig, siginfo_t *info, void *uap)
 {
 	static char		c = 0;
 	static int		i = 1;
@@ -55,7 +55,7 @@ int	main(void)
 	struct sigaction	act1;
 	int					pid;
 
-	act1.sa_sigaction = &universal;
+	act1.sa_sigaction = &handler;
 	act1.sa_flags = SA_SIGINFO;
 	sigemptyset(&act1.sa_mask);
 	sigaddset(&act1.sa_mask, SIGUSR1);

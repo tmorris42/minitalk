@@ -42,7 +42,7 @@ void	handler(int sig, siginfo_t *info, void *uap)
 			msg_print(msg);
 			msg_clear(&msg);
 		}
-		else if (!(msg_new_add_back(&msg, info->si_pid, c)))
+		else if (!(msg_new_add_back(&msg, c)))
 			quit_safely(&msg);
 		c = 0;
 		i = 1;

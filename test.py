@@ -164,12 +164,12 @@ if __name__ == "__main__":
     err += test_one_server_two_clients("hello ")
 
     letters = string.ascii_letters + string.digits + string.punctuation
- #   test_string = ''.join(random.choice(letters) for i in range(100))
-  #  total += 1
-   # err += test_one_server_one_client(test_string)
+    test_string = ''.join(random.choice(letters) for i in range(100))
+    total += 1
+    err += test_one_server_one_client(test_string)
     
-  #  test_string = ''.join(random.choice(letters) for i in range(500))
-  #  total += 1
-  #  err += test_one_server_one_client(test_string)
+    test_string = ''.join(random.choice(letters) for i in range(500))
+    total += 1
+    err += test_one_server_one_client(test_string)
 
     print(f"Passed {total + err}/{total}\n")

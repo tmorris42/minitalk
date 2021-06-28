@@ -1,6 +1,6 @@
 NAME = server
 CLIENT = client
-SERVER_SRCS = server.c
+SERVER_SRCS = server.c messages.c
 CLIENT_SRCS = client.c
 HEADERS = minitalk.h
 

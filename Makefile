@@ -1,6 +1,6 @@
 NAME = server
 CLIENT = client
-SERVER_SRCS = server.c messages.c
+SERVER_SRCS = server.c messages.c msg_print.c
 CLIENT_SRCS = client.c
 HEADERS = minitalk.h
 
@@ -25,10 +25,10 @@ $(CLIENT): $(CLIENT_OBJS)
 	$(GCC) $(FLAGS) $(CLIENT_SRCS) -o $(CLIENT)
 
 clean:
-	rm $(SERVER_OBJS) $(CLIENT_OBJS)
+	rm -f $(SERVER_OBJS) $(CLIENT_OBJS)
 
 fclean: clean
-	rm $(NAME) $(CLIENT)
+	rm -f $(NAME) $(CLIENT)
 
 re: fclean all
 

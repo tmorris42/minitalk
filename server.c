@@ -18,8 +18,9 @@ static void	ft_putnbr(int n)
 
 void	universal(int sig, siginfo_t *info, void *uap)
 {
-	static char	c = 0;
-	static int	i = 1;
+	static char		c = 0;
+	static int		i = 1;
+	static t_msg	*msg = NULL;
 
 	if (!uap)
 		return ;
@@ -28,8 +29,16 @@ void	universal(int sig, siginfo_t *info, void *uap)
 	i = i << 1;
 	if (i > 255)
 	{
-		if (c)
-			write(1, &c, 1);
+		if (!c)
+		{
+			msg_print(msg);
+			msg_clear(&msg);
+		}
+		else if (!(msg_new_add_back(&msg, info->si_pid, c)))
+		{
+			msg_clear(&msg);
+			exit(0);
+		}
 		c = 0;
 		i = 1;
 	}

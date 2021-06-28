@@ -25,6 +25,7 @@ typedef struct s_conn
 t_msg	*msg_new(int pid, char c);
 t_msg	*msg_last(t_msg *list);
 t_msg	*msg_add_back(t_msg **list, t_msg *new);
+t_msg	*msg_new_add_back(t_msg **list, int pid, char c);
 t_msg	*msg_clear(t_msg **list);
 void	msg_print(t_msg *msg);
 

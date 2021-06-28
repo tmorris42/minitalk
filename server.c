@@ -16,6 +16,12 @@ static void	ft_putnbr(int n)
 	ft_putnbr(n % 10);
 }
 
+void	quit_safely(t_msg **msg_addr)
+{
+	msg_clear(msg_addr);
+	exit(0);
+}
+
 void	universal(int sig, siginfo_t *info, void *uap)
 {
 	static char		c = 0;
@@ -25,10 +31,7 @@ void	universal(int sig, siginfo_t *info, void *uap)
 	if (!uap)
 		return ;
 	if (sig == SIGINT)
-	{
-		msg_clear(&msg);
-		exit(0);
-	}
+		quit_safely(&msg);
 	if (sig == SIGUSR1)
 		c = (c | i);
 	i = i << 1;
@@ -40,10 +43,7 @@ void	universal(int sig, siginfo_t *info, void *uap)
 			msg_clear(&msg);
 		}
 		else if (!(msg_new_add_back(&msg, info->si_pid, c)))
-		{
-			msg_clear(&msg);
-			exit(0);
-		}
+			quit_safely(&msg);
 		c = 0;
 		i = 1;
 	}

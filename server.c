@@ -24,6 +24,11 @@ void	universal(int sig, siginfo_t *info, void *uap)
 
 	if (!uap)
 		return ;
+	if (sig == SIGINT)
+	{
+		msg_clear(&msg);
+		exit(0);
+	}
 	if (sig == SIGUSR1)
 		c = (c | i);
 	i = i << 1;
@@ -55,9 +60,12 @@ int	main(void)
 	sigemptyset(&act1.sa_mask);
 	sigaddset(&act1.sa_mask, SIGUSR1);
 	sigaddset(&act1.sa_mask, SIGUSR2);
+	sigaddset(&act1.sa_mask, SIGINT);
 	if (sigaction(SIGUSR1, &act1, NULL) < 0)
 		return (1);
 	if (sigaction(SIGUSR2, &act1, NULL) < 0)
+		return (1);
+	if (sigaction(SIGINT, &act1, NULL) < 0)
 		return (1);
 	pid = getpid();
 	if (pid < 1)

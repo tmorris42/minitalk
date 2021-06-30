@@ -16,13 +16,13 @@ static void	ft_putnbr(int n)
 	ft_putnbr(n % 10);
 }
 
-void	quit_safely(t_msg **msg_addr)
+static void	quit_safely(t_msg **msg_addr)
 {
 	msg_clear(msg_addr);
 	exit(0);
 }
 
-void	handler(int sig, siginfo_t *info, void *uap)
+static void	handler(int sig, siginfo_t *info, void *uap)
 {
 	static char		c = 0;
 	static int		i = 1;

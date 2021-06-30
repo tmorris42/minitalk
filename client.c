@@ -21,7 +21,7 @@ static int	ft_atoi(char *msg)
 	return (i);
 }
 
-void	send_char(pid_t pid, char c)
+static void	send_char(pid_t pid, char c)
 {
 	int		i;
 
@@ -38,7 +38,7 @@ void	send_char(pid_t pid, char c)
 	}
 }
 
-void	send_msg(pid_t pid, char *msg)
+static void	send_msg(pid_t pid, char *msg)
 {
 	int	i;
 

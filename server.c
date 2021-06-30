@@ -53,7 +53,7 @@ void	handler(int sig, siginfo_t *info, void *uap)
 int	main(void)
 {
 	struct sigaction	act1;
-	int					pid;
+	pid_t				pid;
 
 	act1.sa_sigaction = &handler;
 	act1.sa_flags = SA_SIGINFO;

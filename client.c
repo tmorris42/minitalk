@@ -21,7 +21,7 @@ static int	ft_atoi(char *msg)
 	return (i);
 }
 
-void	send_char(int pid, char c)
+void	send_char(pid_t pid, char c)
 {
 	int		i;
 
@@ -38,7 +38,7 @@ void	send_char(int pid, char c)
 	}
 }
 
-void	send_msg(int pid, char *msg)
+void	send_msg(pid_t pid, char *msg)
 {
 	int	i;
 
@@ -60,7 +60,7 @@ void	send_msg(int pid, char *msg)
 
 int	main(int argc, char **argv)
 {
-	int		pid;
+	pid_t	pid;
 	char	*msg;
 
 	signal(SIGUSR1, SIG_IGN);

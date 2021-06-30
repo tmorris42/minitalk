@@ -147,6 +147,7 @@ def test_one_server_two_clients(msg="test"):
     return ret
 
 if __name__ == "__main__":
+    print("Beginning Tests\nGoal is 100c < 1s; 1000c < 2s")
     if not os.path.isdir("./logs"):
         os.mkdir("logs")
     if os.path.exists(TEMP_LOG):
@@ -165,6 +166,12 @@ if __name__ == "__main__":
     err += test_one_server_one_client("\n")
     total += 1
     err += test_one_server_two_clients("hello ")
+    total += 1
+    err += test_one_server_one_client("")
+    total += 1
+    err += test_one_server_one_client("\t\n\\")
+    total += 1
+    err += test_one_server_one_client("\a")
 
     letters = string.ascii_letters + string.digits + string.punctuation
     test_string = ''.join(random.choice(letters) for i in range(100))
@@ -172,6 +179,10 @@ if __name__ == "__main__":
     err += test_one_server_one_client(test_string)
     
     test_string = ''.join(random.choice(letters) for i in range(500))
+    total += 1
+    err += test_one_server_one_client(test_string)
+
+    test_string = ''.join(random.choice(letters) for i in range(1000))
     total += 1
     err += test_one_server_one_client(test_string)
 

@@ -32,7 +32,6 @@ static void	send_char(pid_t pid, char c)
 			kill(pid, SIGUSR1);
 		else
 			kill(pid, SIGUSR2);
-		usleep(DELAY);
 		i = i << 1;
 		usleep(DELAY);
 	}
@@ -48,14 +47,7 @@ static void	send_msg(pid_t pid, char *msg)
 		send_char(pid, msg[i]);
 		++i;
 	}
-	i = 0;
-	while (i < 8)
-	{
-		kill(pid, SIGUSR2);
-		usleep(DELAY);
-		usleep(DELAY);
-		++i;
-	}
+	send_char(pid, '\0');
 }
 
 int	main(int argc, char **argv)

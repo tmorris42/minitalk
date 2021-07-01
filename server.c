@@ -28,7 +28,7 @@ static void	handler(int sig, siginfo_t *info, void *uap)
 	static int		i = 1;
 	static t_msg	*msg = NULL;
 
-	if (!uap)
+	if (!uap | !info)
 		return ;
 	if (sig == SIGINT)
 		quit_safely(&msg);
@@ -56,7 +56,7 @@ int	main(void)
 	pid_t				pid;
 
 	act1.sa_sigaction = &handler;
-	act1.sa_flags = SA_SIGINFO | SA_RESTART;
+	act1.sa_flags = SA_SIGINFO;
 	sigemptyset(&act1.sa_mask);
 	sigaddset(&act1.sa_mask, SIGUSR1);
 	sigaddset(&act1.sa_mask, SIGUSR2);

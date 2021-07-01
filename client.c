@@ -33,7 +33,7 @@ static void	send_char(pid_t pid, char c)
 		else
 			kill(pid, SIGUSR2);
 		usleep(DELAY);
-		i *= 2;
+		i = i << 1;
 		usleep(DELAY);
 	}
 }

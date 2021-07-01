@@ -56,7 +56,7 @@ int	main(void)
 	pid_t				pid;
 
 	act1.sa_sigaction = &handler;
-	act1.sa_flags = SA_SIGINFO;
+	act1.sa_flags = SA_SIGINFO | SA_RESTART;
 	sigemptyset(&act1.sa_mask);
 	sigaddset(&act1.sa_mask, SIGUSR1);
 	sigaddset(&act1.sa_mask, SIGUSR2);
